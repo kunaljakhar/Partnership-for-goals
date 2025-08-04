@@ -1,14 +1,6 @@
-#!/usr/bin/env python3
-"""
-Complete Project Negotiation System
-Includes database setup, negotiation logic, and CLI interface
-"""
-
 import sqlite3
 import sys
 import os
-
-# ===== DATABASE SETUP FUNCTIONS =====
 
 def update_projects_table():
     """
@@ -18,12 +10,10 @@ def update_projects_table():
     - expected_deliverables (TEXT)
     """
     
-    # Connect to the database
     conn = sqlite3.connect('data.db')
     cursor = conn.cursor()
     
     try:
-        # Check if projects table exists
         cursor.execute("""
             SELECT name FROM sqlite_master 
             WHERE type='table' AND name='projects'
@@ -34,11 +24,9 @@ def update_projects_table():
         if table_exists:
             print("Projects table exists. Checking for new columns...")
             
-            # Get current table schema
             cursor.execute("PRAGMA table_info(projects)")
             columns = [column[1] for column in cursor.fetchall()]
             
-            # Add missing columns
             new_columns = [
                 ('expected_budget', 'INTEGER'),
                 ('expected_timeline_days', 'INTEGER'),
@@ -55,7 +43,6 @@ def update_projects_table():
         else:
             print("Projects table doesn't exist. Creating new table...")
             
-            # Create new table with all columns
             cursor.execute("""
                 CREATE TABLE projects (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,7 +57,6 @@ def update_projects_table():
             """)
             print("Created projects table with new schema")
         
-        # Commit changes
         conn.commit()
         print("Projects table updated successfully!")
         
@@ -92,12 +78,10 @@ def create_proposals_table():
     - proposed_deliverables (TEXT)
     """
     
-    # Connect to the database
     conn = sqlite3.connect('data.db')
     cursor = conn.cursor()
     
     try:
-        # Check if proposals table already exists
         cursor.execute("""
             SELECT name FROM sqlite_master 
             WHERE type='table' AND name='proposals'
@@ -107,7 +91,6 @@ def create_proposals_table():
             print("Proposals table already exists!")
         
         else:
-            # Create the proposals table
             cursor.execute("""
                 CREATE TABLE proposals (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -145,7 +128,7 @@ def insert_sample_data():
     cursor = conn.cursor()
     
     try:
-        # Create clients table if it doesn't exist
+        
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS clients (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -154,7 +137,6 @@ def insert_sample_data():
             )
         """)
         
-        # Insert sample clients
         cursor.execute("SELECT COUNT(*) FROM clients")
         if cursor.fetchone()[0] == 0:
             sample_clients = [
@@ -165,7 +147,7 @@ def insert_sample_data():
             cursor.executemany("INSERT INTO clients (name, email) VALUES (?, ?)", sample_clients)
             print("Inserted sample clients")
         
-        # Insert sample projects
+        
         cursor.execute("SELECT COUNT(*) FROM projects")
         if cursor.fetchone()[0] == 0:
             sample_projects = [
@@ -179,7 +161,7 @@ def insert_sample_data():
             """, sample_projects)
             print("Inserted sample projects")
         
-        # Insert sample proposals
+        
         cursor.execute("SELECT COUNT(*) FROM proposals")
         if cursor.fetchone()[0] == 0:
             sample_proposals = [
@@ -205,7 +187,6 @@ def insert_sample_data():
     finally:
         conn.close()
 
-# ===== NEGOTIATION LOGIC =====
 
 def negotiate_project(project_id, client_id):
     """
@@ -223,7 +204,7 @@ def negotiate_project(project_id, client_id):
     cursor = conn.cursor()
     
     try:
-        # Fetch expected values from projects table
+        
         cursor.execute("""
             SELECT expected_budget, expected_timeline_days, expected_deliverables, name
             FROM projects 
@@ -236,7 +217,6 @@ def negotiate_project(project_id, client_id):
         
         expected_budget, expected_timeline, expected_deliverables, project_name = project_data
         
-        # Fetch client's proposal
         cursor.execute("""
             SELECT proposed_budget, proposed_timeline_days, proposed_deliverables
             FROM proposals 
@@ -251,7 +231,6 @@ def negotiate_project(project_id, client_id):
         
         proposed_budget, proposed_timeline, proposed_deliverables = proposal_data
         
-        # Helper function to get status and counteroffer
         def get_status_and_counteroffer(expected, proposed):
             if expected is None or proposed is None:
                 return "Cannot Compare", None
@@ -267,18 +246,16 @@ def negotiate_project(project_id, client_id):
                 status = "Accepted"
             elif difference_percent <= 25:
                 status = "Needs Revision"
-                # Calculate counteroffer as midpoint between expected and proposed
+                
                 counteroffer = int((expected + proposed) / 2)
             else:
                 status = "Rejected"
             
             return status, counteroffer
         
-        # Analyze each field
         budget_status, budget_counteroffer = get_status_and_counteroffer(expected_budget, proposed_budget)
         timeline_status, timeline_counteroffer = get_status_and_counteroffer(expected_timeline, proposed_timeline)
         
-        # Handle deliverables
         deliverables_counteroffer = None
         if isinstance(expected_deliverables, str) and isinstance(proposed_deliverables, str):
             deliverables_status = "Accepted" if expected_deliverables.lower().strip() == proposed_deliverables.lower().strip() else "Needs Revision"
@@ -290,7 +267,6 @@ def negotiate_project(project_id, client_id):
             except (ValueError, TypeError):
                 deliverables_status = "Cannot Compare"
         
-        # Determine overall status
         statuses = [budget_status, timeline_status, deliverables_status]
         
         if all(status == "Accepted" for status in statuses):
@@ -334,8 +310,6 @@ def negotiate_project(project_id, client_id):
     finally:
         conn.close()
 
-# ===== CLI INTERFACE =====
-
 def format_currency(amount):
     """Format amount with rupee symbol"""
     if amount is None:
@@ -351,7 +325,6 @@ def print_negotiation_results(project_id, client_id):
         print(f"Error: {results['error']}")
         return
     
-    # Budget line
     budget = results["budget"]
     if budget["status"] == "Needs Revision" and budget["expected"] and budget["proposed"]:
         counteroffer_text = f", Counteroffer: {format_currency(budget['counteroffer'])}" if budget["counteroffer"] else ""
@@ -361,7 +334,6 @@ def print_negotiation_results(project_id, client_id):
     else:
         print(f"Budget: {budget['status']}")
     
-    # Timeline line
     timeline = results["timeline"]
     if timeline["status"] == "Needs Revision" and timeline["expected"] and timeline["proposed"]:
         counteroffer_text = f", Counteroffer: {timeline['counteroffer']} days" if timeline["counteroffer"] else ""
@@ -371,7 +343,6 @@ def print_negotiation_results(project_id, client_id):
     else:
         print(f"Timeline: {timeline['status']}")
     
-    # Deliverables line
     deliverables = results["deliverables"]
     if deliverables["status"] == "Needs Revision" and deliverables["expected"] and deliverables["proposed"]:
         if deliverables["counteroffer"]:
@@ -468,8 +439,6 @@ def list_projects_and_proposals():
     
     finally:
         conn.close()
-
-# ===== MAIN CLI FUNCTION =====
 
 def main():
     """Main CLI function"""

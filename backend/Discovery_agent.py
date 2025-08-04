@@ -1,26 +1,19 @@
 import sqlite3
 import os
 
-# ============================================================================
-# DATABASE SETUP FUNCTIONS
-# ============================================================================
-
 def create_database():
     """Create SQLite database with users and projects tables"""
     
-    # Database file path (current directory)
     db_path = "data.db"
     
-    # Remove existing database file if it exists (optional - for clean slate)
     if os.path.exists(db_path):
         print(f"Database {db_path} already exists. Connecting to existing database...")
     
-    # Connect to SQLite database (creates file if it doesn't exist)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     try:
-        # Create users table
+        
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +24,6 @@ def create_database():
             )
         ''')
         
-        # Create projects table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS projects (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +33,6 @@ def create_database():
             )
         ''')
         
-        # Commit the changes
         conn.commit()
         print(f"Database '{db_path}' created successfully!")
         print("Tables created:")
@@ -57,28 +48,26 @@ def create_database():
         print(f"An error occurred: {e}")
     
     finally:
-        # Close the connection
+        
         conn.close()
 
 def insert_sample_data():
     """Insert 3 sample users and 3 sample projects into data.db"""
     
-    # Connect to the database
+   
     conn = sqlite3.connect('data.db')
     cursor = conn.cursor()
     
     print("Connected to data.db database")
     
     try:
-        # Sample users data
-        # Each user has: name, email, password, skills (2-3 skills as comma-separated string)
+        
         users = [
             ("Alice Johnson", "alice@email.com", "password123", "python, marketing"),
             ("Bob Chen", "bob@email.com", "securepass456", "javascript, design, photography"),
             ("Carol Davis", "carol@email.com", "mypass789", "data analysis, sql, python")
         ]
         
-        # Insert users one by one
         print("\nInserting users...")
         for user in users:
             cursor.execute('''
@@ -87,15 +76,12 @@ def insert_sample_data():
             ''', user)
             print(f"  Added user: {user[0]} with skills: {user[3]}")
         
-        # Sample projects data
-        # Each project has: title, description, tags (comma-separated string)
         projects = [
             ("Personal Blog", "A simple blog website built with modern web technologies", "python, web, blog"),
             ("Data Dashboard", "Interactive dashboard for visualizing sales data", "data analysis, visualization"),
             ("Mobile Game", "Fun puzzle game for smartphones", "mobile, game, design")
         ]
         
-        # Insert projects one by one
         print("\nInserting projects...")
         for project in projects:
             cursor.execute('''
@@ -104,11 +90,9 @@ def insert_sample_data():
             ''', project)
             print(f"  Added project: {project[0]} with tags: {project[2]}")
         
-        # Save all changes to the database
         conn.commit()
-        print("\n✅ All data inserted successfully!")
+        print("\nAll data inserted successfully!")
         
-        # Show what we just added
         print("\n--- Users in database ---")
         cursor.execute("SELECT id, name, email, skills FROM users")
         all_users = cursor.fetchall()
@@ -124,20 +108,16 @@ def insert_sample_data():
             print(f"    Tags: {project[3]}\n")
     
     except sqlite3.IntegrityError as e:
-        print(f"❌ Error: Could not insert data. {e}")
+        print(f"Error: Could not insert data. {e}")
         print("(This might happen if you run the script multiple times)")
     
     except sqlite3.Error as e:
-        print(f"❌ Database error: {e}")
+        print(f"Database error: {e}")
     
     finally:
-        # Always close the database connection
         conn.close()
         print("Database connection closed.")
 
-# ============================================================================
-# PROJECT MATCHING FUNCTIONS
-# ============================================================================
 
 def match_projects_for_user(user_id):
     """
@@ -160,22 +140,19 @@ def match_projects_for_user(user_id):
               ]
     """
     
-    # Connect to the database
     conn = sqlite3.connect('data.db')
     cursor = conn.cursor()
     
     try:
-        # Step 1: Get the user's skills
+        
         cursor.execute("SELECT name, skills FROM users WHERE id = ?", (user_id,))
         user_data = cursor.fetchone()
         
-        # Check if user exists
         if not user_data:
             return []
         
         user_name, user_skills = user_data
         
-        # Convert user skills to a set (lowercase, stripped of whitespace)
         if not user_skills:
             return []
         
@@ -183,30 +160,25 @@ def match_projects_for_user(user_id):
         for skill in user_skills.split(','):
             user_skills_set.add(skill.strip().lower())
         
-        # Step 2: Get all projects
         cursor.execute("SELECT id, title, description, tags FROM projects")
         all_projects = cursor.fetchall()
         
         if not all_projects:
             return []
         
-        # Step 3: Calculate matches for each project
         project_matches = []
         
         for project in all_projects:
             project_id, title, description, tags = project
             
-            # Convert project tags to a set (lowercase, stripped)
             project_tags_set = set()
-            if tags:  # Check if tags is not None or empty
+            if tags:  
                 for tag in tags.split(','):
                     project_tags_set.add(tag.strip().lower())
             
-            # Find matching skills/tags using set intersection
             matched_skills = user_skills_set.intersection(project_tags_set)
             match_count = len(matched_skills)
             
-            # Only include projects with at least one match
             if match_count > 0:
                 project_match = {
                     'project_id': project_id,
@@ -214,21 +186,18 @@ def match_projects_for_user(user_id):
                     'description': description,
                     'tags': tags,
                     'match_count': match_count,
-                    'matched_skills': list(matched_skills)  # Convert set back to list
+                    'matched_skills': list(matched_skills)  
                 }
                 project_matches.append(project_match)
         
-        # Step 4: Sort by match count (highest first) and get top 3
-        # Sort by match_count descending, then by title alphabetically as tiebreaker
         project_matches.sort(key=lambda x: (-x['match_count'], x['title']))
         return project_matches[:3]
     
     except sqlite3.Error as e:
-        print(f"❌ Database error: {e}")
+        print(f"Database error: {e}")
         return []
     
     finally:
-        # Always close the database connection
         conn.close()
 
 def get_user_info(user_id):
@@ -248,11 +217,10 @@ def get_user_info(user_id):
 def display_recommendations(user_id):
     """Display project recommendations for a user"""
     
-    # Get user information
     user_name, user_skills = get_user_info(user_id)
     
     if not user_name:
-        print(f"❌ User with ID {user_id} not found!")
+        print(f"User with ID {user_id} not found!")
         return
     
     print("=" * 60)
@@ -260,17 +228,15 @@ def display_recommendations(user_id):
     print(f"User Skills: {user_skills}")
     print("=" * 60)
     
-    # Get matching projects
     matches = match_projects_for_user(user_id)
     
     if not matches:
-        print("😔 No matching projects found!")
+        print("No matching projects found!")
         print("Try adding more skills or check if there are projects in the database.")
         return
     
     print(f"\n🎯 Found {len(matches)} matching projects:\n")
     
-    # Display each matching project
     for i, match in enumerate(matches, 1):
         print(f"#{i} - {match['title']}")
         print("-" * 40)
@@ -278,10 +244,6 @@ def display_recommendations(user_id):
         print(f"Matching Tags: {match['matched_skills']}")
         print(f"Score: {match['match_count']} out of {len(match['tags'].split(',')) if match['tags'] else 0} tags")
         print()
-
-# ============================================================================
-# UTILITY FUNCTIONS
-# ============================================================================
 
 def show_all_users():
     """Display all users in the database"""
@@ -339,9 +301,6 @@ def check_database_exists():
     """Check if data.db exists"""
     return os.path.exists('data.db')
 
-# ============================================================================
-# MAIN FUNCTIONS AND MENU SYSTEM
-# ============================================================================
 
 def demo_all_users():
     """Demonstrate the matching function with all users in the database"""
@@ -350,7 +309,7 @@ def demo_all_users():
     cursor = conn.cursor()
     
     try:
-        # Get all users
+        
         cursor.execute("SELECT id, name FROM users")
         users = cursor.fetchall()
         
@@ -361,7 +320,7 @@ def demo_all_users():
             print(f"RECOMMENDATIONS FOR: {name} (ID: {user_id})")
             print(f"{'='*50}")
             
-            # Find matches for this user
+            
             matches = match_projects_for_user(user_id)
             
             if matches:
@@ -375,7 +334,7 @@ def demo_all_users():
             print("\n")
     
     except sqlite3.Error as e:
-        print(f"❌ Database error: {e}")
+        print(f" Database error: {e}")
     
     finally:
         conn.close()
@@ -385,7 +344,7 @@ def interactive_menu():
     
     while True:
         print("\n" + "=" * 50)
-        print("🚀 PROJECT MATCHING SYSTEM")
+        print("PROJECT MATCHING SYSTEM")
         print("=" * 50)
         print("1. Setup Database (create tables)")
         print("2. Insert Sample Data")
@@ -401,7 +360,7 @@ def interactive_menu():
             choice = input("Enter your choice (0-7): ").strip()
             
             if choice == "0":
-                print("👋 Goodbye!")
+                print("Goodbye!")
                 break
             
             elif choice == "1":
@@ -410,64 +369,63 @@ def interactive_menu():
             
             elif choice == "2":
                 if not check_database_exists():
-                    print("❌ Database not found! Please create database first (option 1)")
+                    print("Database not found! Please create database first (option 1)")
                     continue
-                print("\n📝 Inserting sample data...")
+                print("\nInserting sample data...")
                 insert_sample_data()
             
             elif choice == "3":
                 if not check_database_exists():
-                    print("❌ Database not found! Please create database first (option 1)")
+                    print("Database not found! Please create database first (option 1)")
                     continue
                 show_all_users()
             
             elif choice == "4":
                 if not check_database_exists():
-                    print("❌ Database not found! Please create database first (option 1)")
+                    print("Database not found! Please create database first (option 1)")
                     continue
                 show_all_projects()
             
             elif choice == "5":
                 if not check_database_exists():
-                    print("❌ Database not found! Please create database first (option 1)")
+                    print("Database not found! Please create database first (option 1)")
                     continue
                 try:
                     user_id = int(input("Enter user ID: "))
-                    print(f"\n🔍 Getting recommendations for user ID {user_id}...")
+                    print(f"\nGetting recommendations for user ID {user_id}...")
                     display_recommendations(user_id)
                 except ValueError:
-                    print("❌ Please enter a valid number")
+                    print("Please enter a valid number")
             
             elif choice == "6":
                 if not check_database_exists():
-                    print("❌ Database not found! Please create database first (option 1)")
+                    print("Database not found! Please create database first (option 1)")
                     continue
-                print("\n🎯 Running demo for all users...")
+                print("\nRunning demo for all users...")
                 demo_all_users()
             
             elif choice == "7":
                 if not check_database_exists():
-                    print("❌ Database not found! Please create database first (option 1)")
+                    print("Database not found! Please create database first (option 1)")
                     continue
                 print("\n⚡ Quick test with user ID 1...")
                 display_recommendations(1)
             
             else:
-                print("❌ Invalid choice! Please enter 0-7")
+                print("Invalid choice! Please enter 0-7")
         
         except KeyboardInterrupt:
-            print("\n\n👋 Goodbye!")
+            print("\n\nGoodbye!")
             break
         except Exception as e:
-            print(f"❌ An error occurred: {e}")
+            print(f"An error occurred: {e}")
 
 def quick_setup_and_test():
     """Quick setup and test function for immediate use"""
     
-    print("🚀 QUICK SETUP AND TEST")
+    print("QUICK SETUP AND TEST")
     print("=" * 40)
     
-    # Create database
     print("Step 1: Creating database...")
     create_database()
     
@@ -479,26 +437,19 @@ def quick_setup_and_test():
     
     show_all_users()
 
-# ============================================================================
-# MAIN EXECUTION
-# ============================================================================
-
 if __name__ == "__main__":
-    print("🎯 COMPLETE PROJECT MATCHING SYSTEM")
+    print("COMPLETE PROJECT MATCHING SYSTEM")
     print("=" * 50)
     
-    # Check if database exists
     if not check_database_exists():
-        print("⚡ Database not found. Running quick setup...")
+        print("Database not found. Running quick setup...")
         quick_setup_and_test()
     else:
-        print("✅ Database found!")
+        print("Database found!")
         
-        # Quick test
-        print("\n🔍 Running quick test with user ID 1...")
+        print("\nRunning quick test with user ID 1...")
         display_recommendations(1)
     
-    # Start interactive menu
     print("\n" + "=" * 50)
     print("Starting interactive menu...")
     interactive_menu()

@@ -11,23 +11,23 @@ import {
 const actions = [
   {
     id: 1,
-    title: "Upload Document",
-    description: "Drag & drop or browse files",
+    title: <h1> Upload <br /> Document</h1>,
+    description: "Drag & drop ",
     icon: Upload,
     color: "bg-primary",
     route: "/documents"
   },
   {
     id: 2,
-    title: "Chat with AI",
-    description: "Get instant help & analysis",
+    title: <h1> Chat with <br /> AI</h1>,
+    description: "Get instant help ",
     icon: MessageSquare,
     color: "bg-ai-accent",
     route: "/chat"
   },
   {
     id: 3,
-    title: "Generate Document",
+    title: "Generate Documents",
     description: "Create from templates",
     icon: FileEdit,
     color: "bg-success",

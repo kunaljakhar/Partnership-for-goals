@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AI Business Workflow Design System - Professional AI-first interface */
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 255 255% 99%;
+    --foreground: 222 84% 6%;
+
+    /* Cards and surfaces */
+    --card: 255 255% 100%;
+    --card-foreground: 222 84% 6%;
+
+    /* Popovers and tooltips */
+    --popover: 255 255% 100%;
+    --popover-foreground: 222 84% 6%;
+
+    /* AI-themed primary colors - Deep professional blue */
+    --primary: 233 47% 24%;
+    --primary-foreground: 255 255% 98%;
+    --primary-glow: 233 67% 45%;
+    --primary-light: 233 30% 85%;
+
+    /* Secondary - Sophisticated purple accent */
+    --secondary: 268 40% 92%;
+    --secondary-foreground: 268 47% 15%;
+    --secondary-accent: 268 67% 55%;
+
+    /* Muted backgrounds */
+    --muted: 220 13% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent colors */
+    --accent: 220 13% 93%;
+    --accent-foreground: 222 47% 11%;
+
+    /* Status colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 255 255% 98%;
+    --success: 142 76% 36%;
+    --success-foreground: 255 255% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 84% 6%;
+
+    /* AI-specific colors */
+    --ai-accent: 268 67% 55%;
+    --ai-highlight: 268 67% 95%;
+    --ai-border: 268 30% 85%;
+
+    /* Borders and inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 233 47% 24%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-ai: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--ai-accent)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(var(--accent)));
+
+    /* Shadows */
+    --shadow-elegant: 0 4px 20px -4px hsl(var(--primary) / 0.15);
+    --shadow-ai: 0 8px 32px -8px hsl(var(--ai-accent) / 0.25);
+    --shadow-soft: 0 2px 8px -2px hsl(var(--foreground) / 0.08);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark theme backgrounds */
+    --background: 222 84% 5%;
+    --foreground: 255 255% 98%;
+
+    /* Dark cards and surfaces */
+    --card: 222 84% 7%;
+    --card-foreground: 255 255% 98%;
+
+    /* Dark popovers */
+    --popover: 222 84% 7%;
+    --popover-foreground: 255 255% 98%;
+
+    /* Dark primary - Bright AI blue */
+    --primary: 233 67% 65%;
+    --primary-foreground: 222 84% 7%;
+    --primary-glow: 233 80% 75%;
+    --primary-light: 233 50% 25%;
+
+    /* Dark secondary */
+    --secondary: 217 33% 18%;
+    --secondary-foreground: 255 255% 98%;
+    --secondary-accent: 268 67% 65%;
+
+    /* Dark muted */
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Dark accent */
+    --accent: 217 33% 20%;
+    --accent-foreground: 255 255% 98%;
+
+    /* Dark status colors */
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 255 255% 98%;
+    --success: 142 70% 45%;
+    --success-foreground: 255 255% 98%;
+    --warning: 38 85% 55%;
+    --warning-foreground: 222 84% 7%;
+
+    /* Dark AI colors */
+    --ai-accent: 268 67% 65%;
+    --ai-highlight: 268 67% 15%;
+    --ai-border: 268 30% 25%;
+
+    /* Dark borders */
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 233 67% 65%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

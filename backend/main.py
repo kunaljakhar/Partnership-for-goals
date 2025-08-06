@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 controller = MultiAgentController()
 
-# Allow all origins for testing - restrict this in prod!
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Pydantic models for request/response
 class Project(BaseModel):
     id: int
     name: str
